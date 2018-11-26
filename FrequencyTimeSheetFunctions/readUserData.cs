@@ -14,52 +14,71 @@ namespace FrequencyTimeSheetFunctions
         [FunctionName("readUserData")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
+                // parse query parameter
+                string phonenumber = req.GetQueryNameValuePairs()
+                    .FirstOrDefault(q => string.Compare(q.Key, "phonenumber", true) == 0)
+                    .Value;
 
-            //log.Info("C# HTTP trigger function processed a request.");
-
-            //// parse query parameter
-            //string name = req.GetQueryNameValuePairs()
-            //    .FirstOrDefault(q => string.Compare(q.Key, "name", true) == 0)
-            //    .Value;
-
-            //if (name == null)
-            //{
-            //    // Get request body
-            //    dynamic data = await req.Content.ReadAsAsync<object>();
-            //    name = data?.name;
-            //}
-
-            //return name == null
-            //    ? req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a name on the query string or in the request body")
-            //    : req.CreateResponse(HttpStatusCode.OK, "Hello " + name);
-
-            try
-            {
-                // Build connection string
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
-                builder.DataSource = "tcp:frequency-timesheet.database.windows.net,1433";   // update me
-                builder.UserID = "jasonb";              // update me
-                builder.Password = "Freq4899!";      // update me
-                builder.InitialCatalog = "frequency-timesheet-db";
-
-                // Connect to SQL
-                using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+                if (phonenumber == null)
                 {
-                    connection.Open();
-                    connection.Close();
+                    // Get request body
+                    dynamic data = await req.Content.ReadAsAsync<object>();
+                    phonenumber = data?.phonenumber;
+                }
 
-                    return req.CreateResponse(HttpStatusCode.OK, "Hey everything is working we're in the using code");
-                    
+            if (phonenumber == null)
+            { return req.CreateResponse(HttpStatusCode.BadRequest, "Please enter a phone number to process"); }
+
+            else
+            {
+
+                try
+                {
+                    // Build connection string
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
+                    {
+                        DataSource = "tcp:frequency-timesheet.database.windows.net,1433",
+                        UserID = "jasonb",
+                        Password = "Freq4899!",
+                        InitialCatalog = "frequency-timesheet-db"
+                    };
+
+                    string output = "";
+
+                    // Connect to SQL
+                    using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
+                    {
+                        connection.Open();
+                        string sql = "SELECT * FROM UserTable";
+
+                        using (SqlCommand command = new SqlCommand(sql, connection))
+                        {
+                            SqlDataReader dataReader = await command.ExecuteReaderAsync();
+                            while (await dataReader.ReadAsync())
+                            {
+                                output = output + dataReader.GetValue(0) + " and : " + dataReader.GetValue(1) + "and : " + dataReader.GetValue(2) + "and : " + dataReader.GetValue(3);
+                            }
+                            connection.Close();
+                            return req.CreateResponse(HttpStatusCode.OK, "Test This Output : " + output);
+                        }
+
+
+                    }
+
+
+
+                }
+                catch(SqlException e)
+                {
+                    return req.CreateResponse(HttpStatusCode.OK, "Number of rows returned : ");
                 }
 
 
+            }
 
-            }
-            catch (SqlException e)
-            {
-                //Console.WriteLine(e.ToString());
-                return req.CreateResponse(HttpStatusCode.OK, e.Message);
-            }
+                
+
+
 
 
         }
