@@ -97,7 +97,7 @@ namespace FrequencyTimeSheetFunctions
                 }
                 catch(SqlException e)
                 {
-                    return req.CreateResponse(HttpStatusCode.OK, "A runtime Exception occured :  " + e.Message);
+                    return req.CreateResponse(HttpStatusCode.InternalServerError, "A runtime Exception occured :  " + e.Message);
                 }
 
 
