@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Net;
@@ -6,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace FrequencyTimeSheetFunctions
 {
@@ -43,23 +46,47 @@ namespace FrequencyTimeSheetFunctions
                         InitialCatalog = "frequency-timesheet-db"
                     };
 
-                    string output = "";
+
+
+                    
 
                     // Connect to SQL
                     using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
                     {
                         connection.Open();
-                        string sql = "SELECT * FROM UserTable";
+                        
+                        string sql = "SELECT UserTable.UserName, UserTable.PhoneNumber, ProjectTable.ProjectName, ContractorTable.ContractorName, JobTable.JobName, JobTable.JobDescription FROM UserTable, ProjectTable, ContractorTable, JobTable, JobAssignTable WHERE UserTable.UserID = JobAssignTable.UserID AND " +
+                            "JobAssignTable.JobID = JobTable.JobID AND JobTable.ProjectID = ProjectTable.ProjectID AND ProjectTable.ContractorID = ContractorTable.ContractorID AND UserTable.PhoneNumber = '" + phonenumber + "'";
+
+                        
 
                         using (SqlCommand command = new SqlCommand(sql, connection))
                         {
                             SqlDataReader dataReader = await command.ExecuteReaderAsync();
+
+
+                            Dictionary<string, object> goodresult = new Dictionary<string, object>();
+
+                            List<JObject> jObjects = new List<JObject>();
+
                             while (await dataReader.ReadAsync())
                             {
-                                output = output + dataReader.GetValue(0) + " and : " + dataReader.GetValue(1) + "and : " + dataReader.GetValue(2) + "and : " + dataReader.GetValue(3);
+                                JObject jobject = new JObject
+                                {
+                                    { "UserName", JToken.FromObject(dataReader.GetValue(0)) },
+                                    { "PhoneNumber", JToken.FromObject(dataReader.GetValue(1)) },
+                                    { "ProjectName",  JToken.FromObject(dataReader.GetValue(2)) },
+                                    { "ContractorName", JToken.FromObject(dataReader.GetValue(3)) },
+                                    { "JobName", JToken.FromObject(dataReader.GetValue(4)) },
+                                    { "JobDescription", JToken.FromObject(dataReader.GetValue(5)) }
+                                };
+
+                                jObjects.Add(jobject);
                             }
+
+                            string json = JsonConvert.SerializeObject(jObjects, Formatting.Indented);
                             connection.Close();
-                            return req.CreateResponse(HttpStatusCode.OK, "Test This Output : " + output);
+                            return req.CreateResponse(HttpStatusCode.OK, json);
                         }
 
 
@@ -70,7 +97,7 @@ namespace FrequencyTimeSheetFunctions
                 }
                 catch(SqlException e)
                 {
-                    return req.CreateResponse(HttpStatusCode.OK, "Number of rows returned : ");
+                    return req.CreateResponse(HttpStatusCode.OK, "A runtime Exception occured :  " + e.Message);
                 }
 
 
