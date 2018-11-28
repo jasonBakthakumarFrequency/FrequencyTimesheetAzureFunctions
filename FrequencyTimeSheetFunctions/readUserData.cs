@@ -46,16 +46,13 @@ namespace FrequencyTimeSheetFunctions
                         InitialCatalog = "frequency-timesheet-db"
                     };
 
-
-
-                    
-
                     // Connect to SQL
                     using (SqlConnection connection = new SqlConnection(builder.ConnectionString))
                     {
                         connection.Open();
                         
-                        string sql = "SELECT UserTable.UserName, UserTable.PhoneNumber, ProjectTable.ProjectName, ContractorTable.ContractorName, JobTable.JobName, JobTable.JobDescription FROM UserTable, ProjectTable, ContractorTable, JobTable, JobAssignTable WHERE UserTable.UserID = JobAssignTable.UserID AND " +
+                        //Pretty cool SQL Query 
+                        string sql = "SELECT UserTable.UserID, UserTable.UserName, UserTable.PhoneNumber, ProjectTable.ProjectName, ContractorTable.ContractorName, JobTable.JobName, JobTable.JobDescription FROM UserTable, ProjectTable, ContractorTable, JobTable, JobAssignTable WHERE UserTable.UserID = JobAssignTable.UserID AND " +
                             "JobAssignTable.JobID = JobTable.JobID AND JobTable.ProjectID = ProjectTable.ProjectID AND ProjectTable.ContractorID = ContractorTable.ContractorID AND UserTable.PhoneNumber = '" + phonenumber + "'";
 
                         using (SqlCommand command = new SqlCommand(sql, connection))
@@ -70,12 +67,13 @@ namespace FrequencyTimeSheetFunctions
 
                                 JObject jobject = new JObject
                                 {
-                                    { "UserName", JToken.FromObject(dataReader.GetValue(0)) },
-                                    { "PhoneNumber", JToken.FromObject(dataReader.GetValue(1)) },
-                                    { "ProjectName",  JToken.FromObject(dataReader.GetValue(2)) },
-                                    { "ContractorName", JToken.FromObject(dataReader.GetValue(3)) },
-                                    { "JobName", JToken.FromObject(dataReader.GetValue(4)) },
-                                    { "JobDescription", JToken.FromObject(dataReader.GetValue(5)) }
+                                    { "UserID", JToken.FromObject(dataReader.GetValue(0)) },
+                                    { "UserName", JToken.FromObject(dataReader.GetValue(1)) },
+                                    { "PhoneNumber", JToken.FromObject(dataReader.GetValue(2)) },
+                                    { "ProjectName",  JToken.FromObject(dataReader.GetValue(3)) },
+                                    { "ContractorName", JToken.FromObject(dataReader.GetValue(4)) },
+                                    { "JobName", JToken.FromObject(dataReader.GetValue(5)) },
+                                    { "JobDescription", JToken.FromObject(dataReader.GetValue(6)) }
                                 };
                                 jObjects.Add(jobject);
                             }
@@ -106,12 +104,7 @@ namespace FrequencyTimeSheetFunctions
                 }
 
 
-            }
-
-                
-
-
-
+            }   
 
         }
     }
