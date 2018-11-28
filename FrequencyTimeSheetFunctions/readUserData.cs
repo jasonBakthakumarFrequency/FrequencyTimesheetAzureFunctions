@@ -83,7 +83,7 @@ namespace FrequencyTimeSheetFunctions
                             {
                                 //There were no records. Just send an empty JSON Object back!
                                 connection.Close();
-                                return req.CreateResponse(HttpStatusCode.OK, "{}");
+                                return req.CreateResponse(HttpStatusCode.OK, "This phone number does not exist in our records");
                             }
                             else
                             {
