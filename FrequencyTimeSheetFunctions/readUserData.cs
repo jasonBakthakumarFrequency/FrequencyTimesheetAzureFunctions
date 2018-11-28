@@ -58,19 +58,16 @@ namespace FrequencyTimeSheetFunctions
                         string sql = "SELECT UserTable.UserName, UserTable.PhoneNumber, ProjectTable.ProjectName, ContractorTable.ContractorName, JobTable.JobName, JobTable.JobDescription FROM UserTable, ProjectTable, ContractorTable, JobTable, JobAssignTable WHERE UserTable.UserID = JobAssignTable.UserID AND " +
                             "JobAssignTable.JobID = JobTable.JobID AND JobTable.ProjectID = ProjectTable.ProjectID AND ProjectTable.ContractorID = ContractorTable.ContractorID AND UserTable.PhoneNumber = '" + phonenumber + "'";
 
-                        
-
                         using (SqlCommand command = new SqlCommand(sql, connection))
                         {
                             SqlDataReader dataReader = await command.ExecuteReaderAsync();
 
 
-                            Dictionary<string, object> goodresult = new Dictionary<string, object>();
-
                             List<JObject> jObjects = new List<JObject>();
 
                             while (await dataReader.ReadAsync())
                             {
+
                                 JObject jobject = new JObject
                                 {
                                     { "UserName", JToken.FromObject(dataReader.GetValue(0)) },
@@ -80,13 +77,21 @@ namespace FrequencyTimeSheetFunctions
                                     { "JobName", JToken.FromObject(dataReader.GetValue(4)) },
                                     { "JobDescription", JToken.FromObject(dataReader.GetValue(5)) }
                                 };
-
                                 jObjects.Add(jobject);
                             }
-
-                            string json = JsonConvert.SerializeObject(jObjects, Formatting.Indented);
-                            connection.Close();
-                            return req.CreateResponse(HttpStatusCode.OK, json);
+                            if (jObjects.Count <= 0)
+                            {
+                                //There were no records. Just send an empty JSON Object back!
+                                connection.Close();
+                                return req.CreateResponse(HttpStatusCode.OK, "{}");
+                            }
+                            else
+                            {
+                                string json = JsonConvert.SerializeObject(jObjects, Formatting.Indented);
+                                connection.Close();
+                                return req.CreateResponse(HttpStatusCode.OK, json);
+                            }
+                            
                         }
 
 
