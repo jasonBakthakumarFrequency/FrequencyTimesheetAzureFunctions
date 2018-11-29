@@ -85,7 +85,7 @@ namespace FrequencyTimeSheetFunctions
                             }
                             else
                             {
-                                string json = JsonConvert.SerializeObject(jObjects, Formatting.Indented);
+                                string json = JsonConvert.SerializeObject(jObjects, Formatting.None);
                                 connection.Close();
                                 return req.CreateResponse(HttpStatusCode.OK, json);
                             }
