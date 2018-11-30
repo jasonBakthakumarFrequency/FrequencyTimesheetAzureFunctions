@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2050
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrequencyTimeSheetFunctions", "FrequencyTimeSheetFunctions\FrequencyTimeSheetFunctions.csproj", "{19B17EA8-790E-4D0E-8877-878D47C8BEF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FrequencyTimeSheetFunctions", "FrequencyTimeSheetFunctions\FrequencyTimeSheetFunctions.csproj", "{19B17EA8-790E-4D0E-8877-878D47C8BEF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
